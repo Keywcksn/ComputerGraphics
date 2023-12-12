@@ -48,6 +48,30 @@ let grass = () => {
     scene.add(mesh)
 }
 
+let sky = () => {
+    geo = new THREE.BoxGeometry(1000, 1000, 1000)
+
+    const ft = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_ft.jpg")
+    const bk = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_bk.jpg")
+    const up = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_up.jpg")
+    const dn = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_dn.jpg")
+    const rt = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_rt.jpg")
+    const lf = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_lf.jpg")
+
+    const materials = [
+        new THREE.MeshBasicMaterial({ map: rt, side: THREE.BackSide }), // right
+        new THREE.MeshBasicMaterial({ map: lf, side: THREE.BackSide }), // left
+        new THREE.MeshBasicMaterial({ map: up, side: THREE.BackSide }), // top
+        new THREE.MeshBasicMaterial({ map: dn, side: THREE.BackSide }), // bottom
+        new THREE.MeshBasicMaterial({ map: ft, side: THREE.BackSide }), // front
+        new THREE.MeshBasicMaterial({ map: bk, side: THREE.BackSide })  // back
+    ]
+    mesh = new THREE.Mesh(geo, materials)
+    scene.add(mesh)
+}
+
+
+
 const zombie = () => {
     let loader = new GLTFLoader()
     loader.load("./Assets/zombie/scene.gltf", function(gltf){
@@ -164,19 +188,18 @@ let fence5 = () => {
 }
 
 let text = () => {
-    let loader = new FontLoader()
-    loader.load('fonts/gentilis_bold.typeface.json', function(font){
-        geo = new TextGeometry('Plants NO Zombies', {
+    let loader = new THREE.FontLoader()
+    loader.load("./three.js-r145/examples/fonts/gentilis_bold.typeface.json", function(font){
+        geo = new TextGeometry("Plants NO Zombies", {
             font: font,
-            size: 80,
-            height: 5,
-            curveSegment: 12,
-            bevelEnabled: true,
-            bevelThickness: 10,
-            bevelSize: 8,
-            bevelOffset: 0,
-            bevelSegments: 5
+            size: 40,
+            height: 5
         })
+        mat = new THREE.MeshPhongMaterial({color: 0xCCB7B6})
+        mesh = new THREE.Mesh(geo, mat)
+
+        mesh.position.set(-55, 20, -50)
+        scene.add(mesh)
     })   
 }
 
@@ -289,6 +312,7 @@ let spotLight = () => {
 window.onload = () => {
     init();
     grass();
+    sky();
     zombie();
 
     fence1();
