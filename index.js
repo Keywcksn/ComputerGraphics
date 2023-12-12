@@ -1,10 +1,14 @@
 import * as THREE from 'three'
 import {OrbitControls} from 'OrbitControls'
 import {GLTFLoader} from 'GLTFLoader'
+import {AnimationMixer} from 'three'
 // import {FontLoader}  from 'FontLoader'
 
 let scene, camera, cameraPOV, renderer, controls
 let geo, mat, mesh
+let mixer, clips = [], clock
+let currentAnimationIndex = 0
+const loader = new GLTFLoader()
 
 let init = () => {
     scene = new THREE.Scene()
@@ -26,7 +30,7 @@ let init = () => {
 
     renderer = new THREE.WebGLRenderer()
     renderer.setSize(w,h)
-    renderer.setClearColor('lightBlue')
+    renderer.setClearColor('black')
     renderer.shadowMap.enabled = true
 
     controls = new OrbitControls(camera, renderer.domElement)
@@ -70,10 +74,29 @@ let sky = () => {
     scene.add(mesh)
 }
 
+let nightSky = () => {
+    geo = new THREE.BoxGeometry(1000, 1000, 1000)
 
+    const ft = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
+    const bk = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
+    const up = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
+    const dn = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
+    const rt = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
+    const lf = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
+
+    const materials = [
+        new THREE.MeshBasicMaterial({ map: rt, side: THREE.BackSide }), // right
+        new THREE.MeshBasicMaterial({ map: lf, side: THREE.BackSide }), // left
+        new THREE.MeshBasicMaterial({ map: up, side: THREE.BackSide }), // top
+        new THREE.MeshBasicMaterial({ map: dn, side: THREE.BackSide }), // bottom
+        new THREE.MeshBasicMaterial({ map: ft, side: THREE.BackSide }), // front
+        new THREE.MeshBasicMaterial({ map: bk, side: THREE.BackSide })  // back
+    ]
+    mesh = new THREE.Mesh(geo, materials)
+    scene.add(mesh)
+}
 
 const zombie = () => {
-    let loader = new GLTFLoader()
     loader.load("./Assets/zombie/scene.gltf", function(gltf){
         // console.log(gltf)
         const root = gltf.scene
@@ -93,7 +116,6 @@ const zombie = () => {
 }
 
 let fence1 = () => {
-    let loader = new GLTFLoader()
     loader.load("./Assets/fence/scene.gltf", function(gltf){
         // console.log(gltf)
         const fence = gltf.scene
@@ -112,7 +134,6 @@ let fence1 = () => {
 }
 
 let fence2 = () => {
-    let loader = new GLTFLoader()
     loader.load("./Assets/fence/scene.gltf", function(gltf){
         // console.log(gltf)
         const fence = gltf.scene
@@ -131,7 +152,6 @@ let fence2 = () => {
 }
 
 let fence3 = () => {
-    let loader = new GLTFLoader()
     loader.load("./Assets/fence/scene.gltf", function(gltf){
         // console.log(gltf)
         const fence = gltf.scene
@@ -150,7 +170,6 @@ let fence3 = () => {
 }
 
 let fence4 = () => {
-    let loader = new GLTFLoader()
     loader.load("./Assets/fence/scene.gltf", function(gltf){
         // console.log(gltf)
         const fence = gltf.scene
@@ -169,7 +188,6 @@ let fence4 = () => {
 }
 
 let fence5 = () => {
-    let loader = new GLTFLoader()
     loader.load("./Assets/fence/scene.gltf", function(gltf){
         // console.log(gltf)
         const fence = gltf.scene
@@ -188,7 +206,6 @@ let fence5 = () => {
 }
 
 let text = () => {
-    let loader = new THREE.FontLoader()
     loader.load("./three.js-r145/examples/fonts/gentilis_bold.typeface.json", function(font){
         geo = new TextGeometry("Plants NO Zombies", {
             font: font,
@@ -313,6 +330,7 @@ window.onload = () => {
     init();
     grass();
     sky();
+    // nightSky();
     zombie();
 
     fence1();
@@ -321,7 +339,7 @@ window.onload = () => {
     fence4();
     fence5();
 
-    // text();
+    // text(); -> masih error
 
     headPeas();
     mouthPeas();
@@ -334,4 +352,13 @@ window.onload = () => {
     ambientLight();
     spotLight();
     render();
+}
+
+window.onrensize = () => {
+    let w = window.innerWidth
+    let h = window.innerHeight
+
+    renderer.setSize(w, h)
+    camera.aspect = w/h
+    camera.updateProjectionMatrix()
 }
