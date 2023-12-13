@@ -52,49 +52,6 @@ let grass = () => {
     scene.add(mesh)
 }
 
-let sky = () => {
-    geo = new THREE.BoxGeometry(1000, 1000, 1000)
-
-    const ft = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_ft.jpg")
-    const bk = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_bk.jpg")
-    const up = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_up.jpg")
-    const dn = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_dn.jpg")
-    const rt = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_rt.jpg")
-    const lf = new THREE.TextureLoader().load("./Assets/cloudy/bluecloud_lf.jpg")
-
-    const materials = [
-        new THREE.MeshBasicMaterial({ map: rt, side: THREE.BackSide }), // right
-        new THREE.MeshBasicMaterial({ map: lf, side: THREE.BackSide }), // left
-        new THREE.MeshBasicMaterial({ map: up, side: THREE.BackSide }), // top
-        new THREE.MeshBasicMaterial({ map: dn, side: THREE.BackSide }), // bottom
-        new THREE.MeshBasicMaterial({ map: ft, side: THREE.BackSide }), // front
-        new THREE.MeshBasicMaterial({ map: bk, side: THREE.BackSide })  // back
-    ]
-    mesh = new THREE.Mesh(geo, materials)
-    scene.add(mesh)
-}
-
-let nightSky = () => {
-    geo = new THREE.BoxGeometry(1000, 1000, 1000)
-
-    const ft = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
-    const bk = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
-    const up = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
-    const dn = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
-    const rt = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
-    const lf = new THREE.TextureLoader().load("./Assets/nightskycolor.png")
-
-    const materials = [
-        new THREE.MeshBasicMaterial({ map: rt, side: THREE.BackSide }), // right
-        new THREE.MeshBasicMaterial({ map: lf, side: THREE.BackSide }), // left
-        new THREE.MeshBasicMaterial({ map: up, side: THREE.BackSide }), // top
-        new THREE.MeshBasicMaterial({ map: dn, side: THREE.BackSide }), // bottom
-        new THREE.MeshBasicMaterial({ map: ft, side: THREE.BackSide }), // front
-        new THREE.MeshBasicMaterial({ map: bk, side: THREE.BackSide })  // back
-    ]
-    mesh = new THREE.Mesh(geo, materials)
-    scene.add(mesh)
-}
 
 const zombie = () => {
     loader.load("./Assets/zombie/scene.gltf", function(gltf){
@@ -392,11 +349,58 @@ const toggleSkybox = () => {
     }
 };
 
+let peaProjectile;
+let isPeaProjectileActive = false;
 
+const createPeaProjectile = () => {
+    const sphereRadius = 1;
+    const sphereWidthSegments = 64;
+
+    const sphereGeometry = new THREE.SphereGeometry(sphereRadius, sphereWidthSegments, sphereWidthSegments);
+    const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0x52D017 });
+
+    peaProjectile = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    peaProjectile.position.set(-27, 10, 0);
+    peaProjectile.castShadow = true;
+
+    scene.add(peaProjectile);
+    isPeaProjectileActive = true;
+};
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+const onMouseClick = (event) => {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    
+    createPeaProjectile();
+};
+
+document.addEventListener('click', onMouseClick, false);
+
+
+const movePeaProjectile = () => {
+    if (isPeaProjectileActive) {
+        peaProjectile.position.x += 2;
+
+        const zombieBoundingSphere = new THREE.Sphere(zombie.position, 10);
+        const peaBoundingSphere = new THREE.Sphere(peaProjectile.position, 1);
+
+        if (zombieBoundingSphere.intersectsSphere(peaBoundingSphere)) {
+            scene.remove(peaProjectile);
+            isPeaProjectileActive = false;
+        }
+    }
+};
 
 let render = () => {
     requestAnimationFrame(render)
     controls.update()
+    movePeaProjectile();
     renderer.render(scene, camera)
 }
 
@@ -417,8 +421,7 @@ let spotLight = () => {
 window.onload = () => {
     init();
     grass();
-    sky();
-    // nightSky();
+    
     zombie();
 
     fence1();
@@ -436,6 +439,7 @@ window.onload = () => {
     eyes2();
     trunk();
     walnut();
+    
 
     nightSkybox();
     skybox();
@@ -446,7 +450,7 @@ window.onload = () => {
     render();
 }
 
-window.onrensize = () => {
+window.onresize = () => {
     let w = window.innerWidth
     let h = window.innerHeight
 
