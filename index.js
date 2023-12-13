@@ -206,18 +206,24 @@ let fence5 = () => {
 }
 
 let text = () => {
-    loader.load("./three.js-r145/examples/fonts/gentilis_bold.typeface.json", function(font){
-        geo = new TextGeometry("Plants NO Zombies", {
+    let loader = new FontLoader();
+    loader.load('three.js-r145/examples/fonts/gentilis_bold.typeface.json', function(font){
+        textGeo = new TextGeometry('Plants NO Zombies', {
             font: font,
             size: 40,
             height: 5
         })
-        mat = new THREE.MeshPhongMaterial({color: 0xCCB7B6})
-        mesh = new THREE.Mesh(geo, mat)
+    });
+        
+        let textMaterial = new THREE.MeshPhongMaterial({
+            color: 'blue'
+        })
 
-        mesh.position.set(-55, 20, -50)
-        scene.add(mesh)
-    })   
+        let textMesh = new THREE.Mesh(textGeo, textMaterial)
+        camera.lookAt(mesh.position)
+        textMesh.castShadow = true
+
+        scene.add(textMesh)
 }
 
 //peashooter
@@ -306,6 +312,88 @@ let walnut = () => {
     scene.add(mesh)
 }
 
+var skyboxMaterials;
+var skyboxMesh;
+
+var skybox = () => {
+    var skyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000);
+
+    var TextureLoader = new THREE.TextureLoader();
+
+    skyboxMaterials = [
+        new THREE.MeshBasicMaterial({
+            map: TextureLoader.load('./Assets/cloudy/bluecloud_ft.jpg'),
+            side: THREE.BackSide
+        }),
+        new THREE.MeshBasicMaterial({
+            map: TextureLoader.load('./Assets/cloudy/bluecloud_bk.jpg'),
+            side: THREE.BackSide
+        }),
+        new THREE.MeshBasicMaterial({
+            map: TextureLoader.load('./Assets/cloudy/bluecloud_up.jpg'),
+            side: THREE.BackSide
+        }),
+        new THREE.MeshBasicMaterial({
+            map: TextureLoader.load('./Assets/cloudy/bluecloud_dn.jpg'),
+            side: THREE.BackSide
+        }),
+        new THREE.MeshBasicMaterial({
+            map: TextureLoader.load('./Assets/cloudy/bluecloud_rt.jpg'),
+            side: THREE.BackSide
+        }),
+        new THREE.MeshBasicMaterial({
+            map: TextureLoader.load('./Assets/cloudy/bluecloud_lf.jpg'),
+            side: THREE.BackSide
+        })
+    ];
+
+    skyboxMesh = new THREE.Mesh(skyboxGeo, skyboxMaterials);
+    skyboxMesh.position.set(0,0,0);
+
+    scene.add(skyboxMesh);
+};
+
+let isDaySkybox = true;
+
+var nightSkyboxMaterials;
+var nightSkyboxMesh;
+
+var nightSkybox = () => {
+    var nightSkyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000);
+
+    var TextureLoader = new THREE.TextureLoader();
+
+    nightSkyboxMaterials = new THREE.MeshBasicMaterial({
+        map: TextureLoader.load('./Assets/nightskycolor.png'),
+        side: THREE.BackSide});
+
+    nightSkyboxMesh = new THREE.Mesh(nightSkyboxGeo, nightSkyboxMaterials);
+    nightSkyboxMesh.position.set(0, 0, 0);
+
+    scene.add(nightSkyboxMesh);
+};
+
+
+document.addEventListener('keydown', (event) => {
+    if (event.keyCode === 32) { 
+        toggleSkybox();
+    }
+});
+
+const toggleSkybox = () => {
+    isDaySkybox = !isDaySkybox;
+
+    if (isDaySkybox) {
+        skyboxMesh.visible = true;
+        nightSkyboxMesh.visible = false;
+    } else {
+        skyboxMesh.visible = false;
+        nightSkyboxMesh.visible = true;
+    }
+};
+
+
+
 let render = () => {
     requestAnimationFrame(render)
     controls.update()
@@ -348,6 +436,10 @@ window.onload = () => {
     eyes2();
     trunk();
     walnut();
+
+    nightSkybox();
+    skybox();
+    
 
     ambientLight();
     spotLight();
