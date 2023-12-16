@@ -1,8 +1,7 @@
 import * as THREE from 'three'
+import * as TRI from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js'
 import {OrbitControls} from 'OrbitControls'
 import {GLTFLoader} from 'GLTFLoader'
-import {AnimationMixer} from 'three'
-// import {FontLoader}  from 'FontLoader'
 
 let scene, camera, cameraPOV, renderer, controls
 let geo, mat, mesh
@@ -163,24 +162,22 @@ let fence5 = () => {
 }
 
 let text = () => {
-    let loader = new FontLoader();
-    loader.load('three.js-r145/examples/fonts/gentilis_bold.typeface.json', function(font){
-        textGeo = new TextGeometry('Plants NO Zombies', {
+    let loader = new TRI.FontLoader()
+    // loader.load('three.js-r145/examples/fonts/gentilis_bold.typeface.json', function(font){
+    loader.load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/fonts/gentilis_bold.typeface.json', font => {
+        let geo = new TRI.TextGeometry('Plants NO Zombies', {
             font: font,
-            size: 40,
-            height: 5
+            size: 10,
+            height: 1
         })
-    });
+        let mat = new THREE.MeshPhongMaterial({color: 0xCCB7B6})
+        let mesh = new THREE.Mesh(geo, mat)
+        mesh.position.set(-55, 20, -50)
         
-        let textMaterial = new THREE.MeshPhongMaterial({
-            color: 'blue'
-        })
+        mesh.castShadow = true
 
-        let textMesh = new THREE.Mesh(textGeo, textMaterial)
-        camera.lookAt(mesh.position)
-        textMesh.castShadow = true
-
-        scene.add(textMesh)
+        scene.add(mesh)
+    })
 }
 
 //peashooter
@@ -343,9 +340,15 @@ const toggleSkybox = () => {
     if (isDaySkybox) {
         skyboxMesh.visible = true;
         nightSkyboxMesh.visible = false;
+
+        spotLightDay.apply = true;
+        spotLightNight.apply = false;
     } else {
         skyboxMesh.visible = false;
         nightSkyboxMesh.visible = true;
+
+        spotLightDay.apply = false;
+        spotLightNight.apply = true;
     }
 };
 
@@ -411,9 +414,18 @@ let ambientLight = () => {
     light.castShadow = true
 }
 
-let spotLight = () => {
-    const light = new THREE.SpotLight(0xFFFFFF, 1.2) //day
+let spotLightDay = () => {
+    var light = new THREE.SpotLight(0xFFFFFF, 1.2) //day
     scene.add(light)
+    light.position.set(-80,40,0)
+    light.castShadow = true
+}
+
+let spotLightNight = () => {
+    var light = new THREE.SpotLight(0xFFFFFF, 0.1) //night
+    const helper = new THREE.SpotLightHelper(light, 1)
+    scene.add(light)
+    scene.add(helper)
     light.position.set(-80,40,0)
     light.castShadow = true
 }
@@ -430,7 +442,7 @@ window.onload = () => {
     fence4();
     fence5();
 
-    // text(); -> masih error
+    text();
 
     headPeas();
     mouthPeas();
@@ -443,10 +455,10 @@ window.onload = () => {
 
     nightSkybox();
     skybox();
-    
 
     ambientLight();
-    spotLight();
+    spotLightDay();
+    // spotLightNight();
     render();
 }
 
