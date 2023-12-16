@@ -3,10 +3,8 @@ import * as TRI from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three
 import {OrbitControls} from 'OrbitControls'
 import {GLTFLoader} from 'GLTFLoader'
 
-let scene, camera, cameraPOV, renderer, controls
+let scene, camera, cameraM, cameraPOV, renderer, controls
 let geo, mat, mesh
-let mixer, clips = [], clock
-let currentAnimationIndex = 0
 const loader = new GLTFLoader()
 
 let init = () => {
@@ -18,24 +16,37 @@ let init = () => {
     let aspect = w/h
 
     //3rd person cam
-    camera = new THREE.PerspectiveCamera(fov, aspect)
-    camera.position.set(0, 15, 55)
-    camera.lookAt(0,7,0)
+    cameraM = new THREE.PerspectiveCamera(fov, aspect)
+    cameraM.position.set(0, 15, 55)
+    
+    camera = cameraM
 
     //1st person cam
-    // cameraPOV = new THREE.PerspectiveCamera(fov, aspect)
-    // cameraPOV.position.set(-50, 15, 0)
-    // cameraPOV.lookAt(0,15,0)
+    cameraPOV = new THREE.PerspectiveCamera(fov, aspect)
+    cameraPOV.position.set(-50, 15, 0)
+    cameraPOV.lookAt(0,15,0)
 
-    renderer = new THREE.WebGLRenderer()
+    renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(w,h)
     renderer.setClearColor('black')
     renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFShadowMap
 
     controls = new OrbitControls(camera, renderer.domElement)
-    // controls.target(0, 7, 0)
+    controls.target.set(0, 7, 0)
 
     document.body.appendChild(renderer.domElement)
+}
+
+let changeCam = () => {
+    scene.remove(cameraM)
+    scene.remove(cameraPOV)
+    if(camera === cameraM){
+        camera = cameraPOV
+    }
+    else{
+        camera = cameraM
+    }
 }
 
 let grass = () => {
@@ -305,6 +316,7 @@ var skybox = () => {
     skyboxMesh.position.set(0,0,0);
 
     scene.add(skyboxMesh);
+    spotLightDay()
 };
 
 let isDaySkybox = true;
@@ -325,6 +337,7 @@ var nightSkybox = () => {
     nightSkyboxMesh.position.set(0, 0, 0);
 
     scene.add(nightSkyboxMesh);
+    spotLightNight()
 };
 
 
@@ -332,25 +345,10 @@ document.addEventListener('keydown', (event) => {
     if (event.keyCode === 32) { 
         toggleSkybox();
     }
-});
-
-const toggleSkybox = () => {
-    isDaySkybox = !isDaySkybox;
-
-    if (isDaySkybox) {
-        skyboxMesh.visible = true;
-        nightSkyboxMesh.visible = false;
-
-        spotLightDay.apply = true;
-        spotLightNight.apply = false;
-    } else {
-        skyboxMesh.visible = false;
-        nightSkyboxMesh.visible = true;
-
-        spotLightDay.apply = false;
-        spotLightNight.apply = true;
+    else if(event.key === 'c' || event.key === 'C'){
+        changeCam();
     }
-};
+});
 
 let peaProjectile;
 let isPeaProjectileActive = false;
@@ -400,13 +398,6 @@ const movePeaProjectile = () => {
     }
 };
 
-let render = () => {
-    requestAnimationFrame(render)
-    controls.update()
-    movePeaProjectile();
-    renderer.render(scene, camera)
-}
-
 let ambientLight = () => {
     const light = new THREE.AmbientLight(0xFFFFFC, 0.5)
     scene.add(light)
@@ -414,20 +405,40 @@ let ambientLight = () => {
     light.castShadow = true
 }
 
-let spotLightDay = () => {
-    var light = new THREE.SpotLight(0xFFFFFF, 1.2) //day
+var spotLightDay = () => {
+    var light = new THREE.SpotLight(0xFFFFFC, 1.2) //day
     scene.add(light)
     light.position.set(-80,40,0)
     light.castShadow = true
 }
 
-let spotLightNight = () => {
-    var light = new THREE.SpotLight(0xFFFFFF, 0.1) //night
-    const helper = new THREE.SpotLightHelper(light, 1)
+var spotLightNight = () => {
+    var light = new THREE.SpotLight(0xFFFFFC, 0.5) //night
     scene.add(light)
-    scene.add(helper)
     light.position.set(-80,40,0)
     light.castShadow = true
+}
+
+const toggleSkybox = () => {
+    isDaySkybox = !isDaySkybox;
+
+    if (isDaySkybox) {
+        skyboxMesh.visible = true;
+        nightSkyboxMesh.visible = false;
+        // spotLightDay()
+
+    } else {
+        skyboxMesh.visible = false;
+        nightSkyboxMesh.visible = true;
+        // spotLightNight()
+    }
+};
+
+let render = () => {
+    requestAnimationFrame(render)
+    controls.update()
+    movePeaProjectile();
+    renderer.render(scene, camera)
 }
 
 window.onload = () => {
@@ -457,8 +468,6 @@ window.onload = () => {
     skybox();
 
     ambientLight();
-    spotLightDay();
-    // spotLightNight();
     render();
 }
 
