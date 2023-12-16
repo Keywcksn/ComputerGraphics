@@ -279,6 +279,9 @@ let walnut = () => {
 
 var skyboxMaterials;
 var skyboxMesh;
+var spotLightDay;
+var spotLightNight;
+
 
 var skybox = () => {
     var skyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000);
@@ -316,7 +319,12 @@ var skybox = () => {
     skyboxMesh.position.set(0,0,0);
 
     scene.add(skyboxMesh);
-    spotLightDay()
+
+    spotLightDay = new THREE.SpotLight(0xFFFFFC, 1.2); //day
+    scene.add(spotLightDay);
+    spotLightDay.position.set(-80, 40, 0);
+    spotLightDay.castShadow = true;
+
 };
 
 let isDaySkybox = true;
@@ -337,7 +345,12 @@ var nightSkybox = () => {
     nightSkyboxMesh.position.set(0, 0, 0);
 
     scene.add(nightSkyboxMesh);
-    spotLightNight()
+
+    spotLightNight = new THREE.SpotLight(0xFFFFFC, 0.5); //night
+    scene.add(spotLightNight);
+    spotLightNight.position.set(-80, 40, 0);
+    spotLightNight.castShadow = true;
+  
 };
 
 
@@ -405,19 +418,6 @@ let ambientLight = () => {
     light.castShadow = true
 }
 
-var spotLightDay = () => {
-    var light = new THREE.SpotLight(0xFFFFFC, 1.2) //day
-    scene.add(light)
-    light.position.set(-80,40,0)
-    light.castShadow = true
-}
-
-var spotLightNight = () => {
-    var light = new THREE.SpotLight(0xFFFFFC, 0.5) //night
-    scene.add(light)
-    light.position.set(-80,40,0)
-    light.castShadow = true
-}
 
 const toggleSkybox = () => {
     isDaySkybox = !isDaySkybox;
@@ -425,11 +425,15 @@ const toggleSkybox = () => {
     if (isDaySkybox) {
         skyboxMesh.visible = true;
         nightSkyboxMesh.visible = false;
+        spotLightDay.visible = true;
+        spotLightNight.visible = false;
         // spotLightDay()
 
     } else {
         skyboxMesh.visible = false;
         nightSkyboxMesh.visible = true;
+        spotLightDay.visible = false;
+        spotLightNight.visible = true;
         // spotLightNight()
     }
 };
