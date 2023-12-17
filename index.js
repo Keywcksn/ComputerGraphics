@@ -15,7 +15,7 @@ let init = () => {
     let h = window.innerHeight
     let aspect = w/h
 
-    //3rd person cam
+    //Main camera
     cameraM = new THREE.PerspectiveCamera(fov, aspect)
     cameraM.position.set(0, 15, 55)
     
@@ -28,7 +28,7 @@ let init = () => {
 
     renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setSize(w,h)
-    renderer.setClearColor('black')
+    renderer.setClearColor('blue')
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFShadowMap
 
@@ -353,15 +353,24 @@ var nightSkybox = () => {
   
 };
 
+const toggleSkybox = () => {
+    isDaySkybox = !isDaySkybox;
 
-document.addEventListener('keydown', (event) => {
-    if (event.keyCode === 32) { 
-        toggleSkybox();
+    if (isDaySkybox) {
+        skyboxMesh.visible = true;
+        nightSkyboxMesh.visible = false;
+        spotLightDay.visible = true;
+        spotLightNight.visible = false;
+        // spotLightDay()
+
+    } else {
+        skyboxMesh.visible = false;
+        nightSkyboxMesh.visible = true;
+        spotLightDay.visible = false;
+        spotLightNight.visible = true;
+        // spotLightNight()
     }
-    else if(event.key === 'c' || event.key === 'C'){
-        changeCam();
-    }
-});
+};
 
 let peaProjectile;
 let isPeaProjectileActive = false;
@@ -419,24 +428,14 @@ let ambientLight = () => {
 }
 
 
-const toggleSkybox = () => {
-    isDaySkybox = !isDaySkybox;
-
-    if (isDaySkybox) {
-        skyboxMesh.visible = true;
-        nightSkyboxMesh.visible = false;
-        spotLightDay.visible = true;
-        spotLightNight.visible = false;
-        // spotLightDay()
-
-    } else {
-        skyboxMesh.visible = false;
-        nightSkyboxMesh.visible = true;
-        spotLightDay.visible = false;
-        spotLightNight.visible = true;
-        // spotLightNight()
+document.addEventListener('keydown', (event) => {
+    if (event.keyCode === 32) { 
+        toggleSkybox();
     }
-};
+    else if(event.key === 'c' || event.key === 'C'){
+        changeCam();
+    }
+});
 
 let render = () => {
     requestAnimationFrame(render)
