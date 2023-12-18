@@ -320,7 +320,7 @@ var skybox = () => {
 
     scene.add(skyboxMesh);
 
-    spotLightDay = new THREE.SpotLight(0xFFFFFC, 1.2); //day
+    spotLightDay = new THREE.SpotLight(0xFFFFFF, 1.2); //day
     scene.add(spotLightDay);
     spotLightDay.position.set(-80, 40, 0);
     spotLightDay.castShadow = true;
@@ -346,7 +346,7 @@ var nightSkybox = () => {
 
     scene.add(nightSkyboxMesh);
 
-    spotLightNight = new THREE.SpotLight(0xFFFFFC, 0.5); //night
+    spotLightNight = new THREE.SpotLight(0xFFFFFF, 0.5); //night
     scene.add(spotLightNight);
     spotLightNight.position.set(-80, 40, 0);
     spotLightNight.castShadow = true;
